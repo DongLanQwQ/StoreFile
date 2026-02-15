@@ -1,14 +1,29 @@
 {
     "items": [ 
-        {
-        "id": "code_block",
-        "icon": "👨‍💻",
-        "title_zh": "代码块",
-        "title_en": "code block",
-        "prompt": "```\n```",
-        "order": 233,
-        "comment": "提供空的代码块容器，用于粘贴和格式化代码片段，保持格式整洁。"
-      },
+       {
+  "id": "code_commenter",
+  "icon": "💬",
+  "title_zh": "代码注释生成器",
+  "title_en": "Code Comment Generator",
+  "prompt": "角色：代码文档工程师。\n目标：为提供的代码生成精准、简洁的注释，解释“为什么这么做”而非“做了什么”。\n输入：\n- 代码：这里粘贴需要添加注释的代码片段\n- 编程语言：这里填写\n- 注释风格（可选）：Javadoc/Google/Sphinx/行尾注释/函数头注释\n- 重点关注（可选）：解释复杂算法/说明边界条件处理/标注待优化点\n输出格式：\n- 只输出添加注释后的完整代码，不输出解释。\n- 函数/类使用文档字符串（如Python的\"\"\"docstring\"\"\"）。\n- 复杂逻辑块前添加块注释。\n- 关键或隐晦的单行在行尾添加注释。\n规则：\n- 不注释显而易见的内容（如 `i++  # i加1`）。\n- 聚焦于解释设计决策、边界条件、性能考量、为什么选择特定实现。\n- 如代码存在明显问题，在注释中标明“TODO(原因): 建议修改方式”。\n- 不改变原有代码。\n示例输入：\ndef calculate_discount(price, user_type, is_first_purchase):\n    if user_type == \"vip\" and is_first_purchase:\n        return price * 0.8\n    elif user_type == \"vip\":\n        return price * 0.9\n    elif is_first_purchase:\n        return price * 0.95\n    else:\n        return price\n示例输出：\ndef calculate_discount(price, user_type, is_first_purchase):\n    \"\"\"根据用户类型和首购状态计算折扣后价格。\"\"\"\n    # VIP首购享叠加折扣（80%）优于单一条件\n    if user_type == \"vip\" and is_first_purchase:\n        return price * 0.8\n    elif user_type == \"vip\":\n        return price * 0.9\n    elif is_first_purchase:\n        return price * 0.95\n    else:\n        return price",
+  "order": 229
+},{
+  "id": "doc_function_python",
+  "icon": "🐍",
+  "title_zh": "Python函数文档生成器",
+  "title_en": "Python Function Doc Generator",
+  "prompt": "角色：Python文档工程师。\n目标：为Python函数生成符合PEP 257规范的文档字符串，聚焦用途、参数、返回值、异常。\n输入：\n- 函数签名：def calculate_interest(principal: float, rate: float, years: int) -> float:\n- 函数功能描述（一句话）：计算复利\n- 参数说明：principal-本金, rate-年利率(0-1), years-年数\n- 返回值说明：到期本息总和\n- 异常情况：years为负数时抛出ValueError\n- 文档风格（可选）：Google/NumPy/Sphinx，默认Google\n输出格式：\n- 只输出函数签名和文档字符串，不包含函数体。\n- 使用三重双引号。\n- 包含Args、Returns、Raises三部分。\n- Raises如无异常可省略。\n规则：\n- 不解释显而易见的数据类型（如\": float\"后不再说\"浮点数\"）。\n- Args：每个参数一行，格式“名称: 描述”。描述聚焦参数作用和约束，不重复类型。\n- Returns：描述返回值含义，必要时说明特殊情况（如None）。\n- Raises：列出可能抛出的异常及触发条件。\n- 如函数简单，摘要行可概括全部。\n示例输入：\n函数签名：def load_config(path: Union[str, Path]) -> dict:\n功能描述：从JSON文件加载配置\n参数说明：path-配置文件路径\n返回值说明：配置字典，文件不存在时返回空字典\n异常：JSON格式错误时抛出JSONDecodeError\n示例输出：\ndef load_config(path: Union[str, Path]) -> dict:\n    \"\"\"从JSON文件加载配置。\n\n    Args:\n        path: 配置文件路径。\n\n    Returns:\n        配置字典。文件不存在时返回空字典。\n\n    Raises:\n        JSONDecodeError: 文件内容不是合法的JSON格式。\n    \"\"\"",
+  "order": 228
+},
+{
+  "id": "doc_function_c",
+  "icon": "⚙️",
+  "title_zh": "C函数文档生成器",
+  "title_en": "C Function Doc Generator",
+  "prompt": "角色：C语言文档工程师。\n目标：为C函数生成符合Doxygen风格的多行注释，聚焦功能、参数、返回值、注意点。\n输入：\n- 函数签名：int tcp_socket_create(int domain, int type, int protocol);\n- 函数功能描述：创建TCP套接字并返回文件描述符\n- 参数说明：domain-协议族(AF_INET/AF_INET6), type-套接字类型(SOCK_STREAM), protocol-通常填0\n- 返回值说明：成功返回非负描述符，失败返回-1并设置errno\n- 错误码：EACCES-权限不足，EMFILE-进程描述符耗尽，ENFILE-系统描述符耗尽\n- 头文件依赖：需要包含 <sys/socket.h>\n输出格式：\n- 多行注释，以/**开头，*/结尾。\n- 包含@brief, @param, @return, @note, @see。\n- @param后跟参数名和描述，不使用类型。\n- @return清晰说明成功和失败的返回值含义。\n规则：\n- 不解释POSIX标准中已经明确的errno含义。\n- 对非直观的副作用或资源释放要求加@note说明。\n- 如参数有合法值范围或枚举，在参数描述中说明。\n示例输入：\n函数签名：ssize_t recv_timeout(int fd, void *buf, size_t n, int timeout_ms);\n功能描述：带超时的recv\n参数说明：fd-套接字描述符, buf-接收缓冲区, n-缓冲区大小, timeout_ms-超时毫秒数(<=0表示无限等待)\n返回值说明：成功返回接收字节数(可能小于n)，超时返回0，失败返回-1并设置errno\n注意点：超时通过SO_RCVTIMEO选项实现，不影响fd的默认行为\n示例输出：\n/**\n * @brief 带超时的recv。\n * \n * @param fd 套接字描述符。\n * @param buf 接收缓冲区。\n * @param n 缓冲区大小。\n * @param timeout_ms 超时毫秒数。<=0表示无限等待。\n * @return 成功返回接收字节数（可能小于n），\n *         超时返回0，\n *         失败返回-1并设置errno。\n * @note 通过SO_RCVTIMEO选项实现超时，不影响fd的默认行为。\n * @see recv(2), setsockopt(2)\n */",
+  "order": 227
+},
+        
       {
         "id": "code_block",
         "icon": "👨‍💻",
@@ -48,7 +63,14 @@
         "title_en": "Code Debugging Expert",
         "prompt": "角色：调试专家。\n目标：根据提供的代码、错误信息和预期行为，诊断问题根源并提供修复方案。\n输入：\n- 代码：这里粘贴你的代码\n- 编程语言：这里填写\n- 错误信息（如有）：完整粘贴\n- 预期行为：代码应该做什么？\n- 已尝试的调试步骤（可选）\n输出格式：\n- 问题诊断（可能的原因分析，1-3条）\n- 修复方案（分步骤说明如何修改）\n- 修正后的代码片段（关键部分）\n- 预防建议（如何避免同类问题）\n规则：\n- 优先基于错误信息和代码逻辑进行诊断。\n- 如需联网查询特定库的bug，在“参考资料”中注明。\n- 不展示推理过程。\n示例输出：\n- 问题诊断：错误提示 `KeyError: 'name'`，表明在访问字典的 'name' 键时，该键不存在。可能原因是…\n- 修复方案：在访问前，使用 `dict.get('name')` 方法或先检查键是否存在。",
         "order": 231
-      },
+      },{
+  "id": "doc_api_c_library",
+  "icon": "📖",
+  "title_zh": "C库API使用文档生成器",
+  "title_en": "C Library API Usage Doc Generator",
+  "prompt": "角色：C库文档撰写员。\n目标：为C语言库生成面向调用者的使用文档，包含函数说明、头文件、编译链接、示例。\n输入：\n- 库名称：libuv\n- 库简介：跨平台异步I/O库\n- 核心函数列表：\n  - uv_loop_t *uv_default_loop(void): 获取默认事件循环\n  - int uv_run(uv_loop_t*, uv_run_mode mode): 运行事件循环\n  - uv_tcp_t *uv_tcp_create(uv_loop_t*): 创建TCP句柄\n  - int uv_tcp_bind(uv_tcp_t*, const struct sockaddr*): 绑定地址\n- 头文件：需要 #include <uv.h>\n- 编译链接：-luv\n- 使用示例：一个简单的TCP服务器创建流程\n输出格式：\n- 按模块/功能分组。\n- 每个函数包含：函数原型、功能描述、参数说明、返回值、注意点。\n- 独立章节说明编译链接方式和版本要求。\n- 提供一个完整的最小示例代码片段。\n规则：\n- 不解释标准C类型（如int、void*）。\n- 对句柄类型说明其生命周期和销毁方式。\n- 多线程安全性需特别标注。\n示例输出：\n## 事件循环\n\n### uv_default_loop\n```c\nuv_loop_t *uv_default_loop(void);\n```\n获取进程全局默认事件循环。单例，多次调用返回同一实例。\n\n**返回值**\n指向事件循环的指针。无需手动销毁，进程退出时自动清理。\n\n### uv_run\n```c\nint uv_run(uv_loop_t* loop, uv_run_mode mode);\n```\n运行事件循环，处理挂起的I/O和定时器。\n\n**参数**\n- `loop`: 事件循环实例。\n- `mode`: 运行模式，可选UV_RUN_DEFAULT（处理事件直到没有活跃句柄）、UV_RUN_ONCE（处理一个事件后返回）、UV_RUN_NOWAIT（轮询一次后立即返回）。\n\n**返回值**\n成功返回0，循环结束后返回非0。\n\n## 编译链接\n```bash\ngcc -o myapp myapp.c -luv\n```",
+  "order": 225
+},
       {
         "id": "db_query_helper",
         "icon": "🗄️",
