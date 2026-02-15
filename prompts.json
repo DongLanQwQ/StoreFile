@@ -25,6 +25,30 @@
             "order": 227
         },
         {
+            "id": "embedded_stm32f103_qa",
+            "icon": "🔧",
+            "title_zh": "STM32F103C8T6 嵌入式问答",
+            "title_en": "STM32F103C8T6 Embedded Q&A",
+            "prompt": "角色：STM32嵌入式工程师。\n目标：精准回答关于STM32F103C8T6开发的相关问题，聚焦寄存器、外设配置、驱动编写、常见问题排查。\n输入：\n- 问题：用户的具体技术问题（如：如何配置TIM2输出4路PWM？如何进入待机模式？USART空闲中断如何配置？）\n- 开发环境（可选）：Keil/IAR/STM32CubeIDE，HAL库/标准外设库/直接操作寄存器\n- 已尝试的方案（可选）：用户已经尝试过的代码或配置\n输出格式：\n- 简短诊断（如问题原因概述）\n- 核心解决方案（聚焦关键配置步骤，不赘述基础概念）\n- 关键代码片段（仅包含必要部分，使用C语言）\n- 常见踩坑点（该问题最容易出错的地方）\n- 参考手册章节（如：RM0008 Rev18, 第15.3.4节）\n规则：\n- 不解释GPIO模式的基本含义（如复用推挽输出），除非问题涉及模式选择。\n- 寄存器配置给出具体位定义，而不是“配置相应寄存器”。\n- 区分F103系列与其他STM32的差异（如F103无DMA2）。\n- 涉及时钟时说明使用的是HSI还是HSE，及APB分频关系。\n- 尽可能给出标准外设库或HAL库的等价实现。\n示例输入：\n问题：STM32F103C8T6使用HAL库配置USART1，只能发送不能接收。\n已尝试：MX_USART1_UART_Init后调用HAL_UART_Transmit正常，但HAL_UART_Receive_IT收不到数据。\n示例输出：\n诊断：通常是因为NVIC未使能或中断优先级配置问题。\n核心解决方案：\n1. 确保在HAL_UART_Receive_IT前已使能USART1全局中断：\n   HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);\n   HAL_NVIC_EnableIRQ(USART1_IRQn);\n2. 实现USART1_IRQHandler并调用HAL_UART_IRQHandler：\n   void USART1_IRQHandler(void) {\n       HAL_UART_IRQHandler(&huart1);\n   }\n3. 在接收完成回调HAL_UART_RxCpltCallback中处理数据，并重新调用HAL_UART_Receive_IT继续接收。\n踩坑点：\n- 使用HAL_UART_Receive_IT后，每次接收完成必须再次调用才能接收下一字节。\n- 检查USART1时钟是否已使能（__HAL_RCC_USART1_CLK_ENABLE）。\n参考手册：RM0008 Rev18 第27章 USART，中断部分见表188。",
+            "order": 223
+        },
+        {
+            "id": "embedded_stm32f103_driver",
+            "icon": "📟",
+            "title_zh": "STM32F103外设驱动生成器",
+            "title_en": "STM32F103 Peripheral Driver Generator",
+            "prompt": "角色：嵌入式驱动工程师。\n目标：为STM32F103C8T6生成简洁、可移植的外设驱动代码，聚焦功能实现，可基于HAL库或寄存器。\n输入：\n- 外设类型：TIM2（PWM输出）/USART1（DMA收发）/ADC1（单次转换）/I2C1（主机读写）/SPI1（SD卡通信）\n- 工作模式：如PWM输出频率1kHz，占空比50%；或USART1波特率115200，DMA收发环形缓冲区\n- 引脚连接：如TIM2_CH1使用PA0\n- 库类型：HAL库/标准外设库/寄存器\n- 附加要求：中断处理、回调机制、超时保护等\n输出格式：\n- 初始化函数（包含时钟使能、GPIO配置、外设参数设置）\n- 核心操作函数（如PWM_SetDuty、UART_SendBuffer、ADC_Start）\n- 中断服务函数骨架（如需）\n- 使用示例\n规则：\n- 只输出必要的代码，不输出main函数和头文件包含（除非必要）。\n- 命名采用项目风格（如MX_TIM2_Init，若用户无要求则用标准库风格）。\n- 寄存器版本直接操作寄存器，并注释位定义。\n- 对于HAL库，注意回调函数的注册和弱定义处理。\n- 注明时钟频率假设（如APB1=36MHz，APB2=72MHz）。\n示例输入：\n外设：TIM2 PWM输出\n模式：频率1kHz，占空比可调，通道1使用PA0\n库：寄存器\n时钟：APB1=36MHz（TIM2时钟72MHz）\n示例输出：\n// TIM2 PWM初始化 (PA0, 1kHz, 占空比可调)\nvoid TIM2_PWM_Init(void) {\n    // 1. 使能时钟\n    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;   // TIM2时钟使能（挂载在APB1）\n    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;   // GPIOA时钟使能\n\n    // 2. 配置PA0为复用推挽输出\n    GPIOA->CRL &= ~GPIO_CRL_CNF0;          // 清空配置\n    GPIOA->CRL |= GPIO_CRL_CNF0_1;         // CNF[1:0]=10：复用推挽输出\n    GPIOA->CRL |= GPIO_CRL_MODE0;           // MODE[1:0]=11：输出50MHz\n\n    // 3. TIM2基本配置 (72MHz / (7200-1) / (10-1) = 1kHz)\n    TIM2->PSC = 7200 - 1;                   // 预分频器，计数时钟=72MHz/7200=10kHz\n    TIM2->ARR = 10 - 1;                      // 自动重载，PWM周期=10kHz/10=1kHz\n    TIM2->CCR1 = 0;                          // 初始占空比0%\n\n    // 4. 通道1配置为PWM1模式\n    TIM2->CCMR1 &= ~TIM_CCMR1_OC1M;          // 清空比较模式\n    TIM2->CCMR1 |= TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2; // OC1M=110: PWM模式1\n    TIM2->CCMR1 |= TIM_CCMR1_OC1PE;           // 预装载使能\n\n    // 5. 输出使能\n    TIM2->CCER |= TIM_CCER_CC1E;              // OC1输出使能\n    TIM2->CR1 |= TIM_CR1_ARPE;                 // 自动重载预装载使能\n    TIM2->EGR |= TIM_EGR_UG;                    // 立即更新寄存器\n    TIM2->CR1 |= TIM_CR1_CEN;                    // 启动定时器\n}\n\n// 设置占空比 (0-1000 对应 0%-100%)\nvoid TIM2_SetDuty(uint16_t duty) {\n    TIM2->CCR1 = duty;                          // 直接修改比较值\n}",
+            "order": 221
+        },
+        {
+            "id": "embedded_stm32f103_troubleshoot",
+            "icon": "🔍",
+            "title_zh": "STM32F103故障排查指南",
+            "title_en": "STM32F103 Troubleshooting Guide",
+            "prompt": "角色：嵌入式调试专家。\n目标：诊断STM32F103C8T6开发中的常见故障，给出系统化的排查步骤和解决方案。\n输入：\n- 故障现象：如程序跑飞/JTAG连不上/ADC读数不准/PWM无输出/进入低功耗后电流过高\n- 硬件环境：最小系统板/自制板，晶振频率，供电方式\n- 软件环境：使用HAL库/标准库，时钟配置，优化等级\n- 已做的检查（可选）\n输出格式：\n- 可能原因列表（按可能性排序）\n- 逐项排查步骤（每个步骤给出具体操作方法，如用万用表测电压、用示波器看波形、代码中加入printf调试）\n- 解决方案（对应每个原因给出解决措施）\n- 验证方法（如何确认故障已解决）\n规则：\n- 针对F103C8T6的特定问题（如LSE不起振、USB无3.3V稳压器、PB3/PB4默认JTAG占用）。\n- 区分软件问题和硬件问题，分别给出排查建议。\n- 提供实测可用的调试代码片段（如GPIO翻转测量时间）。\n- 对疑难问题给出参考手册章节。\n示例输入：\n故障：自制STM32F103C8T6板，8MHz晶振，程序能烧录但运行不稳定，偶尔死机。\n已做：检查电源3.3V稳定，复位电路正常。\n示例输出：\n可能原因：\n1. 晶振负载电容不匹配导致起振不稳定\n2. 电源去耦不良，噪声引起Flash读取错误\n3. BOOT0引脚悬空\n4. 看门狗意外使能\n\n排查步骤：\n1. 晶振：用示波器测量OSC_IN/OSC_OUT引脚，观察波形是否正弦波且频率8MHz±1%，峰峰值是否>1V。若波形畸变或幅值低，调整负载电容（典型15-22pF）。\n2. 电源：用示波器DC耦合测3.3V，叠加AC耦合测高频噪声（20MHz带宽限制），噪声峰峰值应<50mV。在VDD和VSS间就近添加0.1μF电容。\n3. BOOT0：测量BOOT0引脚电压，应为低电平。若悬空，内部无上拉/下拉，易受干扰，需外接10k下拉。\n4. 看门狗：检查代码中是否无意中使能了IWDG或WWDG。在main函数开始处添加__HAL_RCC_IWDG_DISABLE()或直接读RCC_CSR寄存器确认。\n\n解决方案：\n- 晶振问题：更换为负载电容匹配的晶振，或尝试HSI内部时钟（8MHz）临时验证。\n- 电源问题：在每个VDD/VSS对（共3对）旁加0.1μF陶瓷电容，靠近引脚放置。主滤波电容建议10μF+0.1μF。\n- BOOT0：加10k下拉电阻。\n\n验证方法：连续运行24小时不死机，或用GPIO翻转测试（main loop中翻转某引脚，用逻辑分析仪观察是否一直翻转）。",
+            "order": 219
+        },
+        {
             "id": "code_block",
             "icon": "👨‍💻",
             "title_zh": "代码块",
@@ -71,14 +95,6 @@
             "title_en": "C Library API Usage Doc Generator",
             "prompt": "角色：C库文档撰写员。\n目标：为C语言库生成面向调用者的使用文档，包含函数说明、头文件、编译链接、示例。\n输入：\n- 库名称：libuv\n- 库简介：跨平台异步I/O库\n- 核心函数列表：\n  - uv_loop_t *uv_default_loop(void): 获取默认事件循环\n  - int uv_run(uv_loop_t*, uv_run_mode mode): 运行事件循环\n  - uv_tcp_t *uv_tcp_create(uv_loop_t*): 创建TCP句柄\n  - int uv_tcp_bind(uv_tcp_t*, const struct sockaddr*): 绑定地址\n- 头文件：需要 #include <uv.h>\n- 编译链接：-luv\n- 使用示例：一个简单的TCP服务器创建流程\n输出格式：\n- 按模块/功能分组。\n- 每个函数包含：函数原型、功能描述、参数说明、返回值、注意点。\n- 独立章节说明编译链接方式和版本要求。\n- 提供一个完整的最小示例代码片段。\n规则：\n- 不解释标准C类型（如int、void*）。\n- 对句柄类型说明其生命周期和销毁方式。\n- 多线程安全性需特别标注。\n示例输出：\n## 事件循环\n\n### uv_default_loop\n```c\nuv_loop_t *uv_default_loop(void);\n```\n获取进程全局默认事件循环。单例，多次调用返回同一实例。\n\n**返回值**\n指向事件循环的指针。无需手动销毁，进程退出时自动清理。\n\n### uv_run\n```c\nint uv_run(uv_loop_t* loop, uv_run_mode mode);\n```\n运行事件循环，处理挂起的I/O和定时器。\n\n**参数**\n- `loop`: 事件循环实例。\n- `mode`: 运行模式，可选UV_RUN_DEFAULT（处理事件直到没有活跃句柄）、UV_RUN_ONCE（处理一个事件后返回）、UV_RUN_NOWAIT（轮询一次后立即返回）。\n\n**返回值**\n成功返回0，循环结束后返回非0。\n\n## 编译链接\n```bash\ngcc -o myapp myapp.c -luv\n```",
             "order": 225
-        },
-        {
-            "id": "db_query_helper",
-            "icon": "🗄️",
-            "title_zh": "数据库查询助手",
-            "title_en": "Database Query Assistant",
-            "prompt": "角色：SQL/NoQL 查询专家。\n目标：根据自然语言描述的需求和数据库结构，生成高效的查询语句。\n输入：\n- 数据库类型：这里填写（如 MySQL 8.0, PostgreSQL, MongoDB）\n- 数据库模式（Schema）：粘贴相关的表结构（CREATE TABLE 语句）或集合文档结构。\n- 查询需求：用自然语言详细描述你需要查询什么。\n- 性能考虑（可选）：如需要避免全表扫描、期望的响应时间等。\n输出格式：\n- 理解与澄清（如有不明确的需求，先提问）\n- 生成的查询语句（格式化良好）\n- 语句解释（分步解释查询逻辑）\n- 性能提示（如建议创建的索引）\n规则：\n- 生成的查询语句应符合最佳实践。\n- 如需联网查询特定数据库版本的函数，在“参考资料”中注明。\n示例输入：\n- 数据库类型：MySQL\n- 表结构：`users(id, name, email, created_at)`，`orders(id, user_id, amount, order_date)`\n- 查询需求：查询2023年每个月，下单总金额超过1000元的用户的名字和邮箱。",
-            "order": 230
         },
         {
             "id": "knowledge_synthesis",
