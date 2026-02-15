@@ -1,107 +1,108 @@
 {
-    "items": [ 
-       {
-  "id": "code_commenter",
-  "icon": "💬",
-  "title_zh": "代码注释生成器",
-  "title_en": "Code Comment Generator",
-  "prompt": "角色：代码文档工程师。\n目标：为提供的代码生成精准、简洁的注释，解释“为什么这么做”而非“做了什么”。\n输入：\n- 代码：这里粘贴需要添加注释的代码片段\n- 编程语言：这里填写\n- 注释风格（可选）：Javadoc/Google/Sphinx/行尾注释/函数头注释\n- 重点关注（可选）：解释复杂算法/说明边界条件处理/标注待优化点\n输出格式：\n- 只输出添加注释后的完整代码，不输出解释。\n- 函数/类使用文档字符串（如Python的\"\"\"docstring\"\"\"）。\n- 复杂逻辑块前添加块注释。\n- 关键或隐晦的单行在行尾添加注释。\n规则：\n- 不注释显而易见的内容（如 `i++  # i加1`）。\n- 聚焦于解释设计决策、边界条件、性能考量、为什么选择特定实现。\n- 如代码存在明显问题，在注释中标明“TODO(原因): 建议修改方式”。\n- 不改变原有代码。\n示例输入：\ndef calculate_discount(price, user_type, is_first_purchase):\n    if user_type == \"vip\" and is_first_purchase:\n        return price * 0.8\n    elif user_type == \"vip\":\n        return price * 0.9\n    elif is_first_purchase:\n        return price * 0.95\n    else:\n        return price\n示例输出：\ndef calculate_discount(price, user_type, is_first_purchase):\n    \"\"\"根据用户类型和首购状态计算折扣后价格。\"\"\"\n    # VIP首购享叠加折扣（80%）优于单一条件\n    if user_type == \"vip\" and is_first_purchase:\n        return price * 0.8\n    elif user_type == \"vip\":\n        return price * 0.9\n    elif is_first_purchase:\n        return price * 0.95\n    else:\n        return price",
-  "order": 229
-},{
-  "id": "doc_function_python",
-  "icon": "🐍",
-  "title_zh": "Python函数文档生成器",
-  "title_en": "Python Function Doc Generator",
-  "prompt": "角色：Python文档工程师。\n目标：为Python函数生成符合PEP 257规范的文档字符串，聚焦用途、参数、返回值、异常。\n输入：\n- 函数签名：def calculate_interest(principal: float, rate: float, years: int) -> float:\n- 函数功能描述（一句话）：计算复利\n- 参数说明：principal-本金, rate-年利率(0-1), years-年数\n- 返回值说明：到期本息总和\n- 异常情况：years为负数时抛出ValueError\n- 文档风格（可选）：Google/NumPy/Sphinx，默认Google\n输出格式：\n- 只输出函数签名和文档字符串，不包含函数体。\n- 使用三重双引号。\n- 包含Args、Returns、Raises三部分。\n- Raises如无异常可省略。\n规则：\n- 不解释显而易见的数据类型（如\": float\"后不再说\"浮点数\"）。\n- Args：每个参数一行，格式“名称: 描述”。描述聚焦参数作用和约束，不重复类型。\n- Returns：描述返回值含义，必要时说明特殊情况（如None）。\n- Raises：列出可能抛出的异常及触发条件。\n- 如函数简单，摘要行可概括全部。\n示例输入：\n函数签名：def load_config(path: Union[str, Path]) -> dict:\n功能描述：从JSON文件加载配置\n参数说明：path-配置文件路径\n返回值说明：配置字典，文件不存在时返回空字典\n异常：JSON格式错误时抛出JSONDecodeError\n示例输出：\ndef load_config(path: Union[str, Path]) -> dict:\n    \"\"\"从JSON文件加载配置。\n\n    Args:\n        path: 配置文件路径。\n\n    Returns:\n        配置字典。文件不存在时返回空字典。\n\n    Raises:\n        JSONDecodeError: 文件内容不是合法的JSON格式。\n    \"\"\"",
-  "order": 228
-},
-{
-  "id": "doc_function_c",
-  "icon": "⚙️",
-  "title_zh": "C函数文档生成器",
-  "title_en": "C Function Doc Generator",
-  "prompt": "角色：C语言文档工程师。\n目标：为C函数生成符合Doxygen风格的多行注释，聚焦功能、参数、返回值、注意点。\n输入：\n- 函数签名：int tcp_socket_create(int domain, int type, int protocol);\n- 函数功能描述：创建TCP套接字并返回文件描述符\n- 参数说明：domain-协议族(AF_INET/AF_INET6), type-套接字类型(SOCK_STREAM), protocol-通常填0\n- 返回值说明：成功返回非负描述符，失败返回-1并设置errno\n- 错误码：EACCES-权限不足，EMFILE-进程描述符耗尽，ENFILE-系统描述符耗尽\n- 头文件依赖：需要包含 <sys/socket.h>\n输出格式：\n- 多行注释，以/**开头，*/结尾。\n- 包含@brief, @param, @return, @note, @see。\n- @param后跟参数名和描述，不使用类型。\n- @return清晰说明成功和失败的返回值含义。\n规则：\n- 不解释POSIX标准中已经明确的errno含义。\n- 对非直观的副作用或资源释放要求加@note说明。\n- 如参数有合法值范围或枚举，在参数描述中说明。\n示例输入：\n函数签名：ssize_t recv_timeout(int fd, void *buf, size_t n, int timeout_ms);\n功能描述：带超时的recv\n参数说明：fd-套接字描述符, buf-接收缓冲区, n-缓冲区大小, timeout_ms-超时毫秒数(<=0表示无限等待)\n返回值说明：成功返回接收字节数(可能小于n)，超时返回0，失败返回-1并设置errno\n注意点：超时通过SO_RCVTIMEO选项实现，不影响fd的默认行为\n示例输出：\n/**\n * @brief 带超时的recv。\n * \n * @param fd 套接字描述符。\n * @param buf 接收缓冲区。\n * @param n 缓冲区大小。\n * @param timeout_ms 超时毫秒数。<=0表示无限等待。\n * @return 成功返回接收字节数（可能小于n），\n *         超时返回0，\n *         失败返回-1并设置errno。\n * @note 通过SO_RCVTIMEO选项实现超时，不影响fd的默认行为。\n * @see recv(2), setsockopt(2)\n */",
-  "order": 227
-},
-        
-      {
-        "id": "code_block",
-        "icon": "👨‍💻",
-        "title_zh": "代码块",
-        "title_en": "code block",
-        "prompt": "```\n```",
-        "order": 233
-      },
-      {
-        "id": "web_search_citation_lite",
-        "icon": "🔎",
-        "title_zh": "联网检索与引用（超精简）",
-        "title_en": "Web Search with Citations (Lite)",
-        "prompt": "角色：检索与事实核查助理（快速版）。\n目标：围绕“这里替换成你的问题/主题”给出基于权威来源的回答。\n输入：\n- 问题/主题：此处填写\n步骤（内部推理，输出不展示）：列出3-5个检索式→检索权威网站（政府/期刊/协会）→提炼3-5个要点→给出2-3条引用。\n输出格式：\n- 答案要点（短句；每条附[编号]）\n- 参考资料（[编号] 标题 | 链接 | 访问日期）\n- 检索式（原样列出）\n规则：不确定写“未知/尚无权威结论”，不要编造。",
-        "order": 221
-      },
-      {
-        "id": "paper_research_survey",
-        "icon": "📚",
-        "title_zh": "论文调研助手（检索+去重+梳理）",
-        "title_en": "Paper Research Survey (Search + Synthesis)",
-        "prompt": "角色：你是研究助理，负责围绕“这里替换成你的研究主题”开展论文调研、去重与梳理。\n目标：列出高相关代表性论文，提炼贡献与方法，构建阅读路径，并给出可验证的来源链接。\n输入：\n- 研究主题：这里替换成你的主题（如：政府数据开放绩效评估）\n- 时间范围：此处填写（如：2018-2024）\n- 重点方向/子问题（可选）：此处填写\n- 质量阈值（可选）：如限定CCF/CORE分区、顶会顶刊、被引≥X\n- 需要的指标（可选）：如方法、数据集、主要发现、局限\n步骤（只在内部推理，输出不展示推理过程）：\n1) 生成检索式（不少于5种），覆盖同义词与中英关键词；展示出来。\n2) 联网检索多个源（尽量覆盖：Google Scholar、Semantic Scholar、arXiv、PubMed/IEEE Xplore/SSRN、CNKI/万方-若可访问）；优先权威与原始出处。\n3) 筛选与去重：按主题相关性、时间范围、质量阈值过滤；基于标题/DOI去重；不要编造DOI或期刊信息。\n4) 提取元数据：题目、年份、作者、来源/会议/期刊、DOI/链接、是否开源、主要贡献、方法、数据集/样本、局限。\n5) 分类与脉络：按主题/方法/应用场景分类；标注“综述/奠基/方法/应用”等类别；建议阅读路径（新手→进阶）。\n6) 引用与可核验：每条论文给出可点击链接与访问日期；若链接失效标记“链接异常(404/403)”并保留可替代链接。\n输出格式（用中文，精炼）：\n- 一、综述（100-150字）\n- 二、代表性论文表（表格列：序号 | 题目 | 年份 | 来源 | 链接 | 主要贡献 | 方法/数据 | 局限 | 类别）\n- 三、研究脉络与分类（要点式）\n- 四、推荐阅读顺序（1→2→3…，每条10-20字理由）\n- 五、参考文献（[编号] 作者. 题目. 来源, 年份. 链接（访问日期：YYYY-MM-DD））\n- 六、检索记录（检索式与使用的平台）\n质量检查：\n- 不确定信息直接标注“未知”，不要猜测或编造。\n- 无法访问或404要如实标注并给替代检索建议。\n- 输出不包含你的推理过程，仅呈现结果与证据。\n示例输入：\n- 研究主题：政务信息公开对公众信任的影响\n- 时间范围：2019-2024\n- 重点方向：因果识别方法（DiD、IV、RDD）\n示例输出（节选）：\n- 综述：近年研究表明，…（略）\n- 代表性论文表：1 | Title A | 2021 | Journal X | https://… | 贡献… | 方法DiD/数据… | 局限… | 方法\n- 检索记录：(\"open government data\" trust) OR (\"information disclosure\" public trust)…；平台：Google Scholar/SSRN/…（略）",
-        "order": 210
-      },
-      {
-        "id": "code_reviewer",
-        "icon": "🔍",
-        "title_zh": "代码审查助手",
-        "title_en": "Code Review Assistant",
-        "prompt": "角色：资深代码审查员。\n目标：对提供的代码片段进行审查，指出潜在问题、改进建议和最佳实践。\n输入：\n- 代码：这里粘贴你的代码\n- 编程语言：这里填写（如 Python 3.9+）\n- 审查重点（可选）：性能/安全性/可读性/架构\n- 上下文/目标（可选）：代码要实现的功能\n输出格式：\n- 总体评价（一句话）\n- 问题清单（列表形式，每条包含：问题描述、所在行号（如适用）、风险等级（高/中/低）、改进建议）\n- 优化建议（针对性能/可读性等）\n- 重写示例（可选，针对最关键的问题给出代码片段）\n规则：\n- 基于提供的代码和语言规范进行审查。\n- 对于不确定的假设，明确标注“假设”。\n- 不展示推理过程。\n示例输出：\n- 总体评价：代码功能正确，但存在性能隐患。\n- 问题清单：\n  - 问题：在循环内使用字符串连接，导致性能低下。行号：15，风险等级：中。建议：使用列表收集字符串，最后用 ''.join()。",
-        "order": 232
-      },
-      {
-        "id": "code_debugger",
-        "icon": "🐛",
-        "title_zh": "代码调试专家",
-        "title_en": "Code Debugging Expert",
-        "prompt": "角色：调试专家。\n目标：根据提供的代码、错误信息和预期行为，诊断问题根源并提供修复方案。\n输入：\n- 代码：这里粘贴你的代码\n- 编程语言：这里填写\n- 错误信息（如有）：完整粘贴\n- 预期行为：代码应该做什么？\n- 已尝试的调试步骤（可选）\n输出格式：\n- 问题诊断（可能的原因分析，1-3条）\n- 修复方案（分步骤说明如何修改）\n- 修正后的代码片段（关键部分）\n- 预防建议（如何避免同类问题）\n规则：\n- 优先基于错误信息和代码逻辑进行诊断。\n- 如需联网查询特定库的bug，在“参考资料”中注明。\n- 不展示推理过程。\n示例输出：\n- 问题诊断：错误提示 `KeyError: 'name'`，表明在访问字典的 'name' 键时，该键不存在。可能原因是…\n- 修复方案：在访问前，使用 `dict.get('name')` 方法或先检查键是否存在。",
-        "order": 231
-      },{
-  "id": "doc_api_c_library",
-  "icon": "📖",
-  "title_zh": "C库API使用文档生成器",
-  "title_en": "C Library API Usage Doc Generator",
-  "prompt": "角色：C库文档撰写员。\n目标：为C语言库生成面向调用者的使用文档，包含函数说明、头文件、编译链接、示例。\n输入：\n- 库名称：libuv\n- 库简介：跨平台异步I/O库\n- 核心函数列表：\n  - uv_loop_t *uv_default_loop(void): 获取默认事件循环\n  - int uv_run(uv_loop_t*, uv_run_mode mode): 运行事件循环\n  - uv_tcp_t *uv_tcp_create(uv_loop_t*): 创建TCP句柄\n  - int uv_tcp_bind(uv_tcp_t*, const struct sockaddr*): 绑定地址\n- 头文件：需要 #include <uv.h>\n- 编译链接：-luv\n- 使用示例：一个简单的TCP服务器创建流程\n输出格式：\n- 按模块/功能分组。\n- 每个函数包含：函数原型、功能描述、参数说明、返回值、注意点。\n- 独立章节说明编译链接方式和版本要求。\n- 提供一个完整的最小示例代码片段。\n规则：\n- 不解释标准C类型（如int、void*）。\n- 对句柄类型说明其生命周期和销毁方式。\n- 多线程安全性需特别标注。\n示例输出：\n## 事件循环\n\n### uv_default_loop\n```c\nuv_loop_t *uv_default_loop(void);\n```\n获取进程全局默认事件循环。单例，多次调用返回同一实例。\n\n**返回值**\n指向事件循环的指针。无需手动销毁，进程退出时自动清理。\n\n### uv_run\n```c\nint uv_run(uv_loop_t* loop, uv_run_mode mode);\n```\n运行事件循环，处理挂起的I/O和定时器。\n\n**参数**\n- `loop`: 事件循环实例。\n- `mode`: 运行模式，可选UV_RUN_DEFAULT（处理事件直到没有活跃句柄）、UV_RUN_ONCE（处理一个事件后返回）、UV_RUN_NOWAIT（轮询一次后立即返回）。\n\n**返回值**\n成功返回0，循环结束后返回非0。\n\n## 编译链接\n```bash\ngcc -o myapp myapp.c -luv\n```",
-  "order": 225
-},
-      {
-        "id": "db_query_helper",
-        "icon": "🗄️",
-        "title_zh": "数据库查询助手",
-        "title_en": "Database Query Assistant",
-        "prompt": "角色：SQL/NoQL 查询专家。\n目标：根据自然语言描述的需求和数据库结构，生成高效的查询语句。\n输入：\n- 数据库类型：这里填写（如 MySQL 8.0, PostgreSQL, MongoDB）\n- 数据库模式（Schema）：粘贴相关的表结构（CREATE TABLE 语句）或集合文档结构。\n- 查询需求：用自然语言详细描述你需要查询什么。\n- 性能考虑（可选）：如需要避免全表扫描、期望的响应时间等。\n输出格式：\n- 理解与澄清（如有不明确的需求，先提问）\n- 生成的查询语句（格式化良好）\n- 语句解释（分步解释查询逻辑）\n- 性能提示（如建议创建的索引）\n规则：\n- 生成的查询语句应符合最佳实践。\n- 如需联网查询特定数据库版本的函数，在“参考资料”中注明。\n示例输入：\n- 数据库类型：MySQL\n- 表结构：`users(id, name, email, created_at)`，`orders(id, user_id, amount, order_date)`\n- 查询需求：查询2023年每个月，下单总金额超过1000元的用户的名字和邮箱。",
-        "order": 230
-      },
-      {
-        "id": "knowledge_synthesis",
-        "icon": "🧠",
-        "title_zh": "知识主题综合",
-        "title_en": "Knowledge Synthesis",
-        "prompt": "角色：知识综合专家。\n目标：围绕“这里替换成你的学习主题”，从多个来源整合信息，形成结构化、易懂的知识综述。\n输入：\n- 学习主题：这里替换\n- 目标受众：初学者/进阶者\n- 核心问题清单：你最想了解的3-5个问题\n- 参考资料（可选）：你已有的文章或视频链接\n步骤（内部推理，输出不展示）：\n1) 列出需要覆盖的子主题。\n2) 如需联网，检索并筛选权威且相关的资料。\n3) 整合信息，用类比、图示化描述等方式降低理解门槛。\n4) 构建知识框架，并标记不同来源间的共识与争议。\n输出格式：\n- 主题概览（一句话定义）\n- 核心知识地图（思维导图式结构）\n- 关键概念拆解（每个概念配以通俗解释和例子）\n- 常见误区与澄清\n- 学习路径建议（下一步学什么）\n- 核心参考资料（链接 | 访问日期）\n规则：\n- 力求清晰、准确、有结构。\n- 区分事实与观点。\n- 引用来源。\n示例输出：主题：机器学习中的“过拟合”。\n- 概览：模型在训练数据上表现太好，以至于无法泛化到新数据。\n- 关键概念：… 可以类比为“死记硬背的学生，不会举一反三”。",
-        "order": 209
-      },
-      {
-        "id": "learning_roadmap",
-        "icon": "🗺️",
-        "title_zh": "学习路径规划",
-        "title_en": "Learning Roadmap Generator",
-        "prompt": "角色：学习路径规划师。\n目标：根据用户的目标、现有水平和可用时间，生成个性化的学习路径。\n输入：\n- 学习目标：你想学会什么？（如：用Python进行数据分析）\n- 当前水平：完全新手/有一些基础/熟悉相关领域\n- 可用时间：每周能投入多少小时？希望多久达成目标？\n- 学习偏好：喜欢看书/看视频/动手做项目？\n- 必须掌握的核心技能/知识点（可选）\n输出格式：\n- 阶段划分（将学习过程分为3-5个阶段）\n- 每个阶段的学习目标、核心资源（建议的书/课程/文档链接）、实践项目建议。\n- 关键里程碑（如何检验自己是否掌握了本阶段内容）\n- 每日/每周学习计划建议（可选）\n- 避坑指南（常见的学习难点和弯路）\n规则：\n- 路径应具体、可执行。\n- 推荐的资源应为公认的高质量内容，可附链接。\n- 鼓励在实践中学习。\n示例输出：目标：3个月内入门Web前端开发。\n- 阶段1（第1-2周）：HTML/CSS核心。目标：能独立搭建一个静态页面。项目：模仿一个简单的产品介绍页。\n- 阶段2（第3-5周）：JavaScript基础。目标：能操作DOM，处理事件。项目：制作一个待办事项列表。",
-        "order": 208
-      },
-      {
-        "id": "prompt_optimizer",
-        "icon": "⚙️",
-        "title_zh": "提示词优化器",
-        "title_en": "Prompt Optimizer",
-        "prompt": "角色：提示词工程师。\n目标：优化用户提供的原始提示词，使其更清晰、具体、易于AI理解和执行。\n输入：\n- 原始提示词：这里粘贴你想要优化的提示词。\n- 期望的输出目标：你希望AI完成什么任务？\n- 遇到的问题（可选）：当前提示词的输出有什么不足？（如太泛、不准确、格式不对）\n输出格式：\n- 原始提示词分析（指出模糊、歧义或缺失的关键要素）\n- 优化后的提示词（可直接使用，建议包含角色、上下文、任务、要求、输出格式）\n- 优化点解释（为什么这样修改）\n- 一个简短的示例（展示优化后提示词的效果）\n规则：\n- 优化后的提示词应结构清晰。\n- 保留用户原始意图。\n示例输入：原始提示词：“写个 Python 脚本。”\n- 分析：目标不明确，缺乏上下文。\n- 优化后：“你是一个 Python 脚本编写专家。请为我编写一个 Python 脚本，功能是批量将指定文件夹下的所有 .txt 文件编码从 GBK 转换为 UTF-8。要求：1. 脚本包含必要的错误处理。2. 输出转换成功的文件列表。3. 提供简单的命令行参数支持（源文件夹路径）。”",
-        "order": 182
-      }
+    "items": [
+        {
+            "id": "code_commenter",
+            "icon": "💬",
+            "title_zh": "代码注释生成器",
+            "title_en": "Code Comment Generator",
+            "prompt": "角色：代码文档工程师。\n目标：为提供的代码生成精准、简洁的注释，解释“为什么这么做”而非“做了什么”。\n输入：\n- 代码：这里粘贴需要添加注释的代码片段\n- 编程语言：这里填写\n- 注释风格（可选）：Javadoc/Google/Sphinx/行尾注释/函数头注释\n- 重点关注（可选）：解释复杂算法/说明边界条件处理/标注待优化点\n输出格式：\n- 只输出添加注释后的完整代码，不输出解释。\n- 函数/类使用文档字符串（如Python的\"\"\"docstring\"\"\"）。\n- 复杂逻辑块前添加块注释。\n- 关键或隐晦的单行在行尾添加注释。\n规则：\n- 不注释显而易见的内容（如 `i++  # i加1`）。\n- 聚焦于解释设计决策、边界条件、性能考量、为什么选择特定实现。\n- 如代码存在明显问题，在注释中标明“TODO(原因): 建议修改方式”。\n- 不改变原有代码。\n示例输入：\ndef calculate_discount(price, user_type, is_first_purchase):\n    if user_type == \"vip\" and is_first_purchase:\n        return price * 0.8\n    elif user_type == \"vip\":\n        return price * 0.9\n    elif is_first_purchase:\n        return price * 0.95\n    else:\n        return price\n示例输出：\ndef calculate_discount(price, user_type, is_first_purchase):\n    \"\"\"根据用户类型和首购状态计算折扣后价格。\"\"\"\n    # VIP首购享叠加折扣（80%）优于单一条件\n    if user_type == \"vip\" and is_first_purchase:\n        return price * 0.8\n    elif user_type == \"vip\":\n        return price * 0.9\n    elif is_first_purchase:\n        return price * 0.95\n    else:\n        return price",
+            "order": 229
+        },
+        {
+            "id": "doc_function_python",
+            "icon": "🐍",
+            "title_zh": "Python函数文档生成器",
+            "title_en": "Python Function Doc Generator",
+            "prompt": "角色：Python文档工程师。\n目标：为Python函数生成符合PEP 257规范的文档字符串，聚焦用途、参数、返回值、异常。\n输入：\n- 函数签名：def calculate_interest(principal: float, rate: float, years: int) -> float:\n- 函数功能描述（一句话）：计算复利\n- 参数说明：principal-本金, rate-年利率(0-1), years-年数\n- 返回值说明：到期本息总和\n- 异常情况：years为负数时抛出ValueError\n- 文档风格（可选）：Google/NumPy/Sphinx，默认Google\n输出格式：\n- 只输出函数签名和文档字符串，不包含函数体。\n- 使用三重双引号。\n- 包含Args、Returns、Raises三部分。\n- Raises如无异常可省略。\n规则：\n- 不解释显而易见的数据类型（如\": float\"后不再说\"浮点数\"）。\n- Args：每个参数一行，格式“名称: 描述”。描述聚焦参数作用和约束，不重复类型。\n- Returns：描述返回值含义，必要时说明特殊情况（如None）。\n- Raises：列出可能抛出的异常及触发条件。\n- 如函数简单，摘要行可概括全部。\n示例输入：\n函数签名：def load_config(path: Union[str, Path]) -> dict:\n功能描述：从JSON文件加载配置\n参数说明：path-配置文件路径\n返回值说明：配置字典，文件不存在时返回空字典\n异常：JSON格式错误时抛出JSONDecodeError\n示例输出：\ndef load_config(path: Union[str, Path]) -> dict:\n    \"\"\"从JSON文件加载配置。\n\n    Args:\n        path: 配置文件路径。\n\n    Returns:\n        配置字典。文件不存在时返回空字典。\n\n    Raises:\n        JSONDecodeError: 文件内容不是合法的JSON格式。\n    \"\"\"",
+            "order": 220
+        },
+        {
+            "id": "doc_function_c",
+            "icon": "⚙️",
+            "title_zh": "C函数文档生成器",
+            "title_en": "C Function Doc Generator",
+            "prompt": "角色：C语言文档工程师。\n目标：为C函数生成符合Doxygen风格的多行注释，聚焦功能、参数、返回值、注意点。\n输入：\n- 函数签名：int tcp_socket_create(int domain, int type, int protocol);\n- 函数功能描述：创建TCP套接字并返回文件描述符\n- 参数说明：domain-协议族(AF_INET/AF_INET6), type-套接字类型(SOCK_STREAM), protocol-通常填0\n- 返回值说明：成功返回非负描述符，失败返回-1并设置errno\n- 错误码：EACCES-权限不足，EMFILE-进程描述符耗尽，ENFILE-系统描述符耗尽\n- 头文件依赖：需要包含 <sys/socket.h>\n输出格式：\n- 多行注释，以/**开头，*/结尾。\n- 包含@brief, @param, @return, @note, @see。\n- @param后跟参数名和描述，不使用类型。\n- @return清晰说明成功和失败的返回值含义。\n规则：\n- 不解释POSIX标准中已经明确的errno含义。\n- 对非直观的副作用或资源释放要求加@note说明。\n- 如参数有合法值范围或枚举，在参数描述中说明。\n示例输入：\n函数签名：ssize_t recv_timeout(int fd, void *buf, size_t n, int timeout_ms);\n功能描述：带超时的recv\n参数说明：fd-套接字描述符, buf-接收缓冲区, n-缓冲区大小, timeout_ms-超时毫秒数(<=0表示无限等待)\n返回值说明：成功返回接收字节数(可能小于n)，超时返回0，失败返回-1并设置errno\n注意点：超时通过SO_RCVTIMEO选项实现，不影响fd的默认行为\n示例输出：\n/**\n * @brief 带超时的recv。\n * \n * @param fd 套接字描述符。\n * @param buf 接收缓冲区。\n * @param n 缓冲区大小。\n * @param timeout_ms 超时毫秒数。<=0表示无限等待。\n * @return 成功返回接收字节数（可能小于n），\n *         超时返回0，\n *         失败返回-1并设置errno。\n * @note 通过SO_RCVTIMEO选项实现超时，不影响fd的默认行为。\n * @see recv(2), setsockopt(2)\n */",
+            "order": 227
+        },
+        {
+            "id": "code_block",
+            "icon": "👨‍💻",
+            "title_zh": "代码块",
+            "title_en": "code block",
+            "prompt": "```\n```",
+            "order": 233
+        },
+        {
+            "id": "web_search_citation_lite",
+            "icon": "🔎",
+            "title_zh": "联网检索与引用（超精简）",
+            "title_en": "Web Search with Citations (Lite)",
+            "prompt": "角色：检索与事实核查助理（快速版）。\n目标：围绕“这里替换成你的问题/主题”给出基于权威来源的回答。\n输入：\n- 问题/主题：此处填写\n步骤（内部推理，输出不展示）：列出3-5个检索式→检索权威网站（政府/期刊/协会）→提炼3-5个要点→给出2-3条引用。\n输出格式：\n- 答案要点（短句；每条附[编号]）\n- 参考资料（[编号] 标题 | 链接 | 访问日期）\n- 检索式（原样列出）\n规则：不确定写“未知/尚无权威结论”，不要编造。",
+            "order": 221
+        },
+        {
+            "id": "paper_research_survey",
+            "icon": "📚",
+            "title_zh": "论文调研助手（检索+去重+梳理）",
+            "title_en": "Paper Research Survey (Search + Synthesis)",
+            "prompt": "角色：你是研究助理，负责围绕“这里替换成你的研究主题”开展论文调研、去重与梳理。\n目标：列出高相关代表性论文，提炼贡献与方法，构建阅读路径，并给出可验证的来源链接。\n输入：\n- 研究主题：这里替换成你的主题（如：政府数据开放绩效评估）\n- 时间范围：此处填写（如：2018-2024）\n- 重点方向/子问题（可选）：此处填写\n- 质量阈值（可选）：如限定CCF/CORE分区、顶会顶刊、被引≥X\n- 需要的指标（可选）：如方法、数据集、主要发现、局限\n步骤（只在内部推理，输出不展示推理过程）：\n1) 生成检索式（不少于5种），覆盖同义词与中英关键词；展示出来。\n2) 联网检索多个源（尽量覆盖：Google Scholar、Semantic Scholar、arXiv、PubMed/IEEE Xplore/SSRN、CNKI/万方-若可访问）；优先权威与原始出处。\n3) 筛选与去重：按主题相关性、时间范围、质量阈值过滤；基于标题/DOI去重；不要编造DOI或期刊信息。\n4) 提取元数据：题目、年份、作者、来源/会议/期刊、DOI/链接、是否开源、主要贡献、方法、数据集/样本、局限。\n5) 分类与脉络：按主题/方法/应用场景分类；标注“综述/奠基/方法/应用”等类别；建议阅读路径（新手→进阶）。\n6) 引用与可核验：每条论文给出可点击链接与访问日期；若链接失效标记“链接异常(404/403)”并保留可替代链接。\n输出格式（用中文，精炼）：\n- 一、综述（100-150字）\n- 二、代表性论文表（表格列：序号 | 题目 | 年份 | 来源 | 链接 | 主要贡献 | 方法/数据 | 局限 | 类别）\n- 三、研究脉络与分类（要点式）\n- 四、推荐阅读顺序（1→2→3…，每条10-20字理由）\n- 五、参考文献（[编号] 作者. 题目. 来源, 年份. 链接（访问日期：YYYY-MM-DD））\n- 六、检索记录（检索式与使用的平台）\n质量检查：\n- 不确定信息直接标注“未知”，不要猜测或编造。\n- 无法访问或404要如实标注并给替代检索建议。\n- 输出不包含你的推理过程，仅呈现结果与证据。\n示例输入：\n- 研究主题：政务信息公开对公众信任的影响\n- 时间范围：2019-2024\n- 重点方向：因果识别方法（DiD、IV、RDD）\n示例输出（节选）：\n- 综述：近年研究表明，…（略）\n- 代表性论文表：1 | Title A | 2021 | Journal X | https://… | 贡献… | 方法DiD/数据… | 局限… | 方法\n- 检索记录：(\"open government data\" trust) OR (\"information disclosure\" public trust)…；平台：Google Scholar/SSRN/…（略）",
+            "order": 210
+        },
+        {
+            "id": "code_reviewer",
+            "icon": "🔍",
+            "title_zh": "代码审查助手",
+            "title_en": "Code Review Assistant",
+            "prompt": "角色：资深代码审查员。\n目标：对提供的代码片段进行审查，指出潜在问题、改进建议和最佳实践。\n输入：\n- 代码：这里粘贴你的代码\n- 编程语言：这里填写（如 Python 3.9+）\n- 审查重点（可选）：性能/安全性/可读性/架构\n- 上下文/目标（可选）：代码要实现的功能\n输出格式：\n- 总体评价（一句话）\n- 问题清单（列表形式，每条包含：问题描述、所在行号（如适用）、风险等级（高/中/低）、改进建议）\n- 优化建议（针对性能/可读性等）\n- 重写示例（可选，针对最关键的问题给出代码片段）\n规则：\n- 基于提供的代码和语言规范进行审查。\n- 对于不确定的假设，明确标注“假设”。\n- 不展示推理过程。\n示例输出：\n- 总体评价：代码功能正确，但存在性能隐患。\n- 问题清单：\n  - 问题：在循环内使用字符串连接，导致性能低下。行号：15，风险等级：中。建议：使用列表收集字符串，最后用 ''.join()。",
+            "order": 232
+        },
+        {
+            "id": "code_debugger",
+            "icon": "🐛",
+            "title_zh": "代码调试专家",
+            "title_en": "Code Debugging Expert",
+            "prompt": "角色：调试专家。\n目标：根据提供的代码、错误信息和预期行为，诊断问题根源并提供修复方案。\n输入：\n- 代码：这里粘贴你的代码\n- 编程语言：这里填写\n- 错误信息（如有）：完整粘贴\n- 预期行为：代码应该做什么？\n- 已尝试的调试步骤（可选）\n输出格式：\n- 问题诊断（可能的原因分析，1-3条）\n- 修复方案（分步骤说明如何修改）\n- 修正后的代码片段（关键部分）\n- 预防建议（如何避免同类问题）\n规则：\n- 优先基于错误信息和代码逻辑进行诊断。\n- 如需联网查询特定库的bug，在“参考资料”中注明。\n- 不展示推理过程。\n示例输出：\n- 问题诊断：错误提示 `KeyError: 'name'`，表明在访问字典的 'name' 键时，该键不存在。可能原因是…\n- 修复方案：在访问前，使用 `dict.get('name')` 方法或先检查键是否存在。",
+            "order": 231
+        },
+        {
+            "id": "doc_api_c_library",
+            "icon": "📖",
+            "title_zh": "C库API使用文档生成器",
+            "title_en": "C Library API Usage Doc Generator",
+            "prompt": "角色：C库文档撰写员。\n目标：为C语言库生成面向调用者的使用文档，包含函数说明、头文件、编译链接、示例。\n输入：\n- 库名称：libuv\n- 库简介：跨平台异步I/O库\n- 核心函数列表：\n  - uv_loop_t *uv_default_loop(void): 获取默认事件循环\n  - int uv_run(uv_loop_t*, uv_run_mode mode): 运行事件循环\n  - uv_tcp_t *uv_tcp_create(uv_loop_t*): 创建TCP句柄\n  - int uv_tcp_bind(uv_tcp_t*, const struct sockaddr*): 绑定地址\n- 头文件：需要 #include <uv.h>\n- 编译链接：-luv\n- 使用示例：一个简单的TCP服务器创建流程\n输出格式：\n- 按模块/功能分组。\n- 每个函数包含：函数原型、功能描述、参数说明、返回值、注意点。\n- 独立章节说明编译链接方式和版本要求。\n- 提供一个完整的最小示例代码片段。\n规则：\n- 不解释标准C类型（如int、void*）。\n- 对句柄类型说明其生命周期和销毁方式。\n- 多线程安全性需特别标注。\n示例输出：\n## 事件循环\n\n### uv_default_loop\n```c\nuv_loop_t *uv_default_loop(void);\n```\n获取进程全局默认事件循环。单例，多次调用返回同一实例。\n\n**返回值**\n指向事件循环的指针。无需手动销毁，进程退出时自动清理。\n\n### uv_run\n```c\nint uv_run(uv_loop_t* loop, uv_run_mode mode);\n```\n运行事件循环，处理挂起的I/O和定时器。\n\n**参数**\n- `loop`: 事件循环实例。\n- `mode`: 运行模式，可选UV_RUN_DEFAULT（处理事件直到没有活跃句柄）、UV_RUN_ONCE（处理一个事件后返回）、UV_RUN_NOWAIT（轮询一次后立即返回）。\n\n**返回值**\n成功返回0，循环结束后返回非0。\n\n## 编译链接\n```bash\ngcc -o myapp myapp.c -luv\n```",
+            "order": 225
+        },
+        {
+            "id": "db_query_helper",
+            "icon": "🗄️",
+            "title_zh": "数据库查询助手",
+            "title_en": "Database Query Assistant",
+            "prompt": "角色：SQL/NoQL 查询专家。\n目标：根据自然语言描述的需求和数据库结构，生成高效的查询语句。\n输入：\n- 数据库类型：这里填写（如 MySQL 8.0, PostgreSQL, MongoDB）\n- 数据库模式（Schema）：粘贴相关的表结构（CREATE TABLE 语句）或集合文档结构。\n- 查询需求：用自然语言详细描述你需要查询什么。\n- 性能考虑（可选）：如需要避免全表扫描、期望的响应时间等。\n输出格式：\n- 理解与澄清（如有不明确的需求，先提问）\n- 生成的查询语句（格式化良好）\n- 语句解释（分步解释查询逻辑）\n- 性能提示（如建议创建的索引）\n规则：\n- 生成的查询语句应符合最佳实践。\n- 如需联网查询特定数据库版本的函数，在“参考资料”中注明。\n示例输入：\n- 数据库类型：MySQL\n- 表结构：`users(id, name, email, created_at)`，`orders(id, user_id, amount, order_date)`\n- 查询需求：查询2023年每个月，下单总金额超过1000元的用户的名字和邮箱。",
+            "order": 230
+        },
+        {
+            "id": "knowledge_synthesis",
+            "icon": "🧠",
+            "title_zh": "知识主题综合",
+            "title_en": "Knowledge Synthesis",
+            "prompt": "角色：知识综合专家。\n目标：围绕“这里替换成你的学习主题”，从多个来源整合信息，形成结构化、易懂的知识综述。\n输入：\n- 学习主题：这里替换\n- 目标受众：初学者/进阶者\n- 核心问题清单：你最想了解的3-5个问题\n- 参考资料（可选）：你已有的文章或视频链接\n步骤（内部推理，输出不展示）：\n1) 列出需要覆盖的子主题。\n2) 如需联网，检索并筛选权威且相关的资料。\n3) 整合信息，用类比、图示化描述等方式降低理解门槛。\n4) 构建知识框架，并标记不同来源间的共识与争议。\n输出格式：\n- 主题概览（一句话定义）\n- 核心知识地图（思维导图式结构）\n- 关键概念拆解（每个概念配以通俗解释和例子）\n- 常见误区与澄清\n- 学习路径建议（下一步学什么）\n- 核心参考资料（链接 | 访问日期）\n规则：\n- 力求清晰、准确、有结构。\n- 区分事实与观点。\n- 引用来源。\n示例输出：主题：机器学习中的“过拟合”。\n- 概览：模型在训练数据上表现太好，以至于无法泛化到新数据。\n- 关键概念：… 可以类比为“死记硬背的学生，不会举一反三”。",
+            "order": 209
+        },
+        {
+            "id": "learning_roadmap",
+            "icon": "🗺️",
+            "title_zh": "学习路径规划",
+            "title_en": "Learning Roadmap Generator",
+            "prompt": "角色：学习路径规划师。\n目标：根据用户的目标、现有水平和可用时间，生成个性化的学习路径。\n输入：\n- 学习目标：你想学会什么？（如：用Python进行数据分析）\n- 当前水平：完全新手/有一些基础/熟悉相关领域\n- 可用时间：每周能投入多少小时？希望多久达成目标？\n- 学习偏好：喜欢看书/看视频/动手做项目？\n- 必须掌握的核心技能/知识点（可选）\n输出格式：\n- 阶段划分（将学习过程分为3-5个阶段）\n- 每个阶段的学习目标、核心资源（建议的书/课程/文档链接）、实践项目建议。\n- 关键里程碑（如何检验自己是否掌握了本阶段内容）\n- 每日/每周学习计划建议（可选）\n- 避坑指南（常见的学习难点和弯路）\n规则：\n- 路径应具体、可执行。\n- 推荐的资源应为公认的高质量内容，可附链接。\n- 鼓励在实践中学习。\n示例输出：目标：3个月内入门Web前端开发。\n- 阶段1（第1-2周）：HTML/CSS核心。目标：能独立搭建一个静态页面。项目：模仿一个简单的产品介绍页。\n- 阶段2（第3-5周）：JavaScript基础。目标：能操作DOM，处理事件。项目：制作一个待办事项列表。",
+            "order": 208
+        },
+        {
+            "id": "prompt_optimizer",
+            "icon": "⚙️",
+            "title_zh": "提示词优化器",
+            "title_en": "Prompt Optimizer",
+            "prompt": "角色：提示词工程师。\n目标：优化用户提供的原始提示词，使其更清晰、具体、易于AI理解和执行。\n输入：\n- 原始提示词：这里粘贴你想要优化的提示词。\n- 期望的输出目标：你希望AI完成什么任务？\n- 遇到的问题（可选）：当前提示词的输出有什么不足？（如太泛、不准确、格式不对）\n输出格式：\n- 原始提示词分析（指出模糊、歧义或缺失的关键要素）\n- 优化后的提示词（可直接使用，建议包含角色、上下文、任务、要求、输出格式）\n- 优化点解释（为什么这样修改）\n- 一个简短的示例（展示优化后提示词的效果）\n规则：\n- 优化后的提示词应结构清晰。\n- 保留用户原始意图。\n示例输入：原始提示词：“写个 Python 脚本。”\n- 分析：目标不明确，缺乏上下文。\n- 优化后：“你是一个 Python 脚本编写专家。请为我编写一个 Python 脚本，功能是批量将指定文件夹下的所有 .txt 文件编码从 GBK 转换为 UTF-8。要求：1. 脚本包含必要的错误处理。2. 输出转换成功的文件列表。3. 提供简单的命令行参数支持（源文件夹路径）。”",
+            "order": 182
+        }
     ]
-  }
+}
